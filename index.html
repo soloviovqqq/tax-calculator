@@ -19,18 +19,18 @@
         </div>
         <hr>
         <div>
-            <label>Курс EUR/UAH:</label>
-            {{ exchangeRate }} грн. ~ {{ roundedExchangeRate }} грн.
+            <label>Курс EUR/UAH на текущий момент (округленный в большую сторону ):</label>
+            {{ exchangeRate }} грн.
         </div>
         <hr>
         <div>
-            <label for="amount">Сумма з/п в евро: </label>
+            <label for="amount">Сумма зачислений в евро: </label>
             <input id="amount" type="number" v-model="amount">
         </div>
         <hr>
         <div>
             <label>ЕСВ налог:</label>
-            {{ esvFees }} грн.
+            {{ esv }} грн.
         </div>
         <div>
             <label>ФОП налог (5%):</label>
@@ -38,16 +38,16 @@
         </div>
         <div>
             <label>Стоимость банковских услуг:</label>
-            {{ bankingFees }} грн.
+            {{ bankingFee }} грн.
         </div>
         <div>
             <label>Стоимость бухгалтерских услуг:</label>
-            {{ accountingFees }} грн.
+            {{ accountingFee }} грн.
         </div>
         <hr>
         <div>
-            <label>Итог остатка на счету:</label>
-            {{ esvFees + tax + bankingFees + accountingFees }} грн.
+            <label>Итог остатка на счету к концу месяца:</label>
+            {{ esv + tax + bankingFee + accountingFee }} грн.
         </div>
     </div>
 </div>
@@ -55,25 +55,24 @@
     const app = Vue.createApp({
         data() {
             return {
-                exchangeRate: null,
-                roundedExchangeRate: null,
+                exchangeRate: 0,
                 amount: 0,
-                esvFees: 1320,
-                bankingFees: 100,
-                accountingFees: 1000,
+                esv: 1320,
+                bankingFee: 100,
+                accountingFee: 500,
             }
         },
         computed: {
             tax() {
-                return this.amount * this.roundedExchangeRate * 0.05;
+                return this.amount * this.exchangeRate * 0.05;
             },
         },
         mounted() {
             fetch('https://api.privatbank.ua/p24api/pubinfo?exchange&json&coursid=11')
                 .then(response => response.json())
                 .then(exchangeRates => {
-                    this.exchangeRate = exchangeRates.filter(rate => rate.ccy === "EUR").shift().sale;
-                    this.roundedExchangeRate = Math.ceil(this.exchangeRate);
+                    let exchangeRate = exchangeRates.filter(rate => rate.ccy === "EUR").shift().sale;
+                    this.exchangeRate = Math.ceil(exchangeRate);
                 });
         }
     });
